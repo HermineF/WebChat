@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html onclick="focus();">
+	<head>
+		<meta charset="utf-8" />
+		<title>Web Chat</title>
+		<script src="/socket.io/socket.io.js"></script>
+		<script src="client.js"></script>
+		<link rel="stylesheet" href="main.css" type="text/css">
+	</head>
+	<body id="body" onclick="focus();">
+		<div id="messages" class="container" onclick="focus();"><br/><br/>
+			<div class="row clearfix">
+				<div class="column full">
+					$$\&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$$\&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$$\&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$$$$$$\&nbsp;&nbsp;$$\&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$$\&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>
+					$$&nbsp;|&nbsp;$\&nbsp;&nbsp;$$&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$$&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$$&nbsp;&nbsp;__$$\&nbsp;$$&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$$&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;<br/>
+					$$&nbsp;|$$$\&nbsp;$$&nbsp;|&nbsp;$$$$$$\&nbsp;&nbsp;$$$$$$$\&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$$&nbsp;/&nbsp;&nbsp;\__|$$$$$$$\&nbsp;&nbsp;&nbsp;$$$$$$\&nbsp;$$$$$$\&nbsp;&nbsp;&nbsp;<br/>
+					$$&nbsp;$$&nbsp;$$\$$&nbsp;|$$&nbsp;&nbsp;__$$\&nbsp;$$&nbsp;&nbsp;__$$\&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$$&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$$&nbsp;&nbsp;__$$\&nbsp;&nbsp;\____$$\\_$$&nbsp;&nbsp;_|&nbsp;&nbsp;<br/>
+					$$$$&nbsp;&nbsp;_$$$$&nbsp;|$$$$$$$$&nbsp;|$$&nbsp;|&nbsp;&nbsp;$$&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$$&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$$&nbsp;|&nbsp;&nbsp;$$&nbsp;|&nbsp;$$$$$$$&nbsp;|&nbsp;$$&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;<br/>
+					$$$&nbsp;&nbsp;/&nbsp;\$$$&nbsp;|$$&nbsp;&nbsp;&nbsp;____|$$&nbsp;|&nbsp;&nbsp;$$&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$$&nbsp;|&nbsp;&nbsp;$$\&nbsp;$$&nbsp;|&nbsp;&nbsp;$$&nbsp;|$$&nbsp;&nbsp;__$$&nbsp;|&nbsp;$$&nbsp;|$$\&nbsp;<br/>
+					$$&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;\$$&nbsp;|\$$$$$$$\&nbsp;$$$$$$$&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\$$$$$$&nbsp;&nbsp;|$$&nbsp;|&nbsp;&nbsp;$$&nbsp;|\$$$$$$$&nbsp;|&nbsp;\$$$$&nbsp;&nbsp;|<br/>
+					\__/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\__|&nbsp;\_______|\_______/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\______/&nbsp;\__|&nbsp;&nbsp;\__|&nbsp;\_______|&nbsp;&nbsp;\____/&nbsp;<br/>
+					<br/><br/>
+					v4.2
+					<br/><br/>
+				</div>
+			</div>
+		</div>
+		<div id="form" class="container" onclick="focus();">
+			<div class="row clearfix">
+				<div class="column full">
+					&gt;<input id="request" onKeyPress="keypress(event, this)" type="text"/>
+				</div>
+			</div>
+			<div class="row clearfix">
+				<div class="column full">
+					<div id="info"></div>
+				</div>
+			</div>
+		</div>
+	</body>
+	<audio id="sound" preload="auto">
+	  <source src="sound.wav" type="audio/wav" />
+	</audio>
+</html>
+<script>focus();</script>
