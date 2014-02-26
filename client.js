@@ -94,10 +94,22 @@ var commands={
 		},
 		"replaceMessage": true,
 		"man": "manuel du petit geek (tu t'attendais à ce que ce soit quoi?!)"
+	},
+	"[TO]": {
+		"regex": "^\[TO:.+\].+$",
+		"replaceMessage": false,
+		"man": "envoie un message personalisé à une personne: la commande doit indiquer l'utilisateur en question. Il est possible également d'envoyer le message à plusieurs personnes en séparant leurs noms par des virgules'<br/>"+tab+tab+"exemples:<br/>"+tab+tab+tab+"[TO:utilisateur1] Bonjour le monde<br/>"+tab+tab+tab+"[TO:utilisateur1,utilisateur2] Bonjour le monde<br/>"
 	}
 };
 var questions = {
-	"pseudo": {"q": "Quel est ton nom manant?","a": undefined},
+	"pseudo": {"q": "Quel est ton nom manant?","a": undefined,validate: function(value){
+		var regex = /^[a-zA-Z0-9@.éèêàùöôïîûüâäç%$£µ€+=-]+$/;
+		if(regex.test(value)){
+			return true;
+		}else{
+			return false;
+		}
+	}},
 	"sound": {"q": "Veux-tu activer les sons?","a": undefined,options: {'o': true,'n': false}},
 	"hour": {"q": "Quel format d'heure veux-tu utiliser?","a": undefined,
 		options: {
@@ -155,7 +167,10 @@ function interpretCommand(message){
 					|| typeof(commands[i].condition) !== "function" && commands[i].condition
 				)
 			){
-				var msg = commands[i].exec(message);
+				var msg = undefined;
+				if(commands[i].exec){
+					msg = commands[i].exec(message);
+				}
 				if(commands[i].replaceMessage){
 					return msg;
 				}else{
@@ -242,7 +257,7 @@ function setAnswer(msg){
 	for(var i in questions){
 		if(typeof(questions[i].a) === "undefined"){
 			// on vérifie la réponse.
-			if(typeof(questions[i].options) === "undefined" || typeof(questions[i].options[msg])!== "undefined"){
+			if(typeof(questions[i].options) === "undefined" || typeof(questions[i].options[msg])!== "undefined" || (typeof(questions[i].validate) !== "undefined" && questions[i].validate() )){
 				questions[i].a=msg;
 				return true;
 			}else{
@@ -345,8 +360,4 @@ window.onclick = function(){
 }
 window.onbeforeunload = function(){
 	socket.emit('died');
-<<<<<<< HEAD
 };
-=======
-};
->>>>>>> bf8ddc7ca542d09b404ee8cfa309ebec3fbb79b7

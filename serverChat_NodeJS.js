@@ -9,7 +9,7 @@ var http = require("http");
 var fs = require('fs');
 var url = require("url");
 
-var users=[];
+var users={};
 
 var requests={
 	"/sound.wav": {file:'./sound.wav',responseCode:200,contentType:"text/html"},
@@ -34,6 +34,16 @@ var server = http.createServer(function(req, res) {
 	});
 });
 
+function isPseudoValid(msg){
+	for(var i in users){
+		if(users[i].pseudo == msg){
+			socket.emit('invalidPseudo', {'name':"server",msg:"Ce pseudo est déjà utilisé par quelqu'un."});
+			return false;
+		}
+	}
+	return true;
+}
+
 var io = require('socket.io').listen(server);
 
 io.sockets.on('connection', function (socket) {
@@ -42,38 +52,49 @@ io.sockets.on('connection', function (socket) {
 	//Envoi des messages aux autres utilisateurs
 	socket.on('message',function(message){
 		if(socket.pseudo){
-			socket.broadcast.emit('message', {'name':socket.pseudo, 'msg':message});
+			var regex = /^\[TO:.+\]/gi;
+			if(regex.test(message)){
+				//envoi du message à une personne/groupe de personnes en particulier
+				var temp = message.replace(/^\[TO:/gi,"").replace(/\].*/gi,"");
+				var usersToSendMessage = temp.split(",");
+				for(var i in usersToSendMessage){
+					if(users[usersToSendMessage[i]]){
+						users[usersToSendMessage[i]].socket.emit({'name':socket.pseudo, 'msg':message});
+					}else{
+						socket.emit('message', {'name':"server",msg:'Je ne connais personne du nom de '+usersToSendMessage[i]});
+					}
+				}
+			}else{
+				socket.broadcast.emit('message', {'name':socket.pseudo, 'msg':message});
+			}
 		}
 	});
 	socket.on('pseudo',function(msg){
-		for(var i in users){
-			if(users[i] == msg){
-				socket.emit('invalidPseudo', {'name':"server",msg:"Ce pseudo est déjà utilisé par quelqu'un."});
-				return;
-			}
-		}
-	
+		if(!isPseudoValid(msg)){return;}
+		
 		socket.pseudo = msg;
 		
 		var usersList = "";
 		if(users.length == 0){
 			usersList = "Il n'y a personne avec toi pour le moment";
 		}else if(users.length == 1){
-			usersList = "Il n'y a que "+users[0]+" avec toi";
-		}else{
-			for(var i=0; i< users.length; i++){if(i!=0){usersList+=", ";}usersList+=users[i];}
+			usersList = "Il n'y a que "+users[0].pseudo+" avec toi";
+		}else if(users.length <= 10){
+			for(var i=0; i< users.length; i++){if(i!=0){usersList+=", ";}usersList+=users[i].pseudo;}
 			usersList += " sont aussi connectés";
+		}else{
+			usersList += users.length+" personnes sont aussi connectés";
 		}
 		socket.emit('message', {'name':"server",msg:usersList});
 		
-		users.push(socket.pseudo);
+		users[socket.pseudo]={pseudo : socket.pseudo, socket: socket};
 		socket.broadcast.emit('message', {'name':"server", msg:socket.pseudo +' vient de nous rejoindre'});
 	});
 	//Prévient les autres qu'on quitte le chat
 	socket.on('died',function(){
 		console.log(socket.pseudo+" s'est déconnecté");
 		socket.broadcast.emit('message', {'name':"server", msg:socket.pseudo +' nous a quitté'});
-		users.unset(socket.pseudo);
+		delete users[socket.pseudo];
 	});
 	socket.on('writing',function(user){
 		socket.broadcast.emit('writing',user);
@@ -83,11 +104,5 @@ io.sockets.on('connection', function (socket) {
 	});
 });
 
-
-
-
-<<<<<<< HEAD
 server.listen(1337);
-=======
-server.listen(1337);
->>>>>>> bf8ddc7ca542d09b404ee8cfa309ebec3fbb79b7
+
