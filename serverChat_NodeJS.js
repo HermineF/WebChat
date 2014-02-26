@@ -86,4 +86,8 @@ io.sockets.on('connection', function (socket) {
 
 
 
+<<<<<<< HEAD
 server.listen(1337);
+=======
+server.listen(1337);
+>>>>>>> bf8ddc7ca542d09b404ee8cfa309ebec3fbb79b7

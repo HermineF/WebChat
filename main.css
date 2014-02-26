@@ -13,4 +13,8 @@ html{margin:0;padding:0;overflow:hidden;display:block;background:#000;overflow:a
 .user{font-weight: bold;}
 	.user::after{content: " dit : ";}
 	.me .user::after{content: " dis : ";}
+<<<<<<< HEAD
 #info{display:block;height:1.2em;width:100%;overflow:hidden;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;}
+=======
+#info{display:block;height:1.2em;width:100%;overflow:hidden;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;}
+>>>>>>> bf8ddc7ca542d09b404ee8cfa309ebec3fbb79b7

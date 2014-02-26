@@ -345,4 +345,8 @@ window.onclick = function(){
 }
 window.onbeforeunload = function(){
 	socket.emit('died');
+<<<<<<< HEAD
 };
+=======
+};
+>>>>>>> bf8ddc7ca542d09b404ee8cfa309ebec3fbb79b7
