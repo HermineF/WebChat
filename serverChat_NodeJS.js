@@ -4,6 +4,15 @@ Array.prototype.unset = function(val){
         this.splice(index,1)
     }
 }
+Object.prototype.length = function() {
+var objectSize = 0;
+  for (var key in this){
+    if (this.hasOwnProperty(key)) {
+      objectSize++;
+    }
+  }
+  return objectSize;
+}
 
 var http = require("http");
 var fs = require('fs');
@@ -61,7 +70,7 @@ io.sockets.on('connection', function (socket) {
 					if(users[usersToSendMessage[i]]){
 						users[usersToSendMessage[i]].socket.emit({'name':socket.pseudo, 'msg':message});
 					}else{
-						socket.emit('message', {'name':"server",msg:'Je ne connais personne du nom de '+usersToSendMessage[i]});
+						socket.emit('message', {'name':"server",msg:'Je ne connais personne du nom de '+i});
 					}
 				}
 			}else{
@@ -75,15 +84,20 @@ io.sockets.on('connection', function (socket) {
 		socket.pseudo = msg;
 		
 		var usersList = "";
-		if(users.length == 0){
+		var usersNb = users.length();
+		if(usersNb == 0){
 			usersList = "Il n'y a personne avec toi pour le moment";
-		}else if(users.length == 1){
-			usersList = "Il n'y a que "+users[0].pseudo+" avec toi";
-		}else if(users.length <= 10){
-			for(var i=0; i< users.length; i++){if(i!=0){usersList+=", ";}usersList+=users[i].pseudo;}
+		}else if(usersNb == 1){
+			for(var i in users){
+				usersList = "Il n'y a que "+users[i].pseudo+" avec toi";
+				break;
+			}
+		}else if(usersNb <= 10){
+			var counter = 0;
+			for(var i in users){if(counter!=0){usersList+=", ";}usersList+=users[i].pseudo;counter++;}
 			usersList += " sont aussi connectés";
 		}else{
-			usersList += users.length+" personnes sont aussi connectés";
+			usersList += usersNb + " personnes sont aussi connectés";
 		}
 		socket.emit('message', {'name':"server",msg:usersList});
 		

@@ -18,7 +18,7 @@ var currentWrittingTimeout = 0;
 */
 var commands={
 	"[BIP]": {
-		"regex": "\[BIP\]",
+		"regex": /\[BIP\]/gi,
 		"exec": function(){
 			var sound=document.getElementById("sound");
 			sound.load();
@@ -31,25 +31,27 @@ var commands={
 		"man": "envoie un signal sonore au reste du monde."
 	},
 	"clear": {
-		"regex": "^clear$",
+		"regex": /^clear$/g,
 		"exec": function(){
 			var div=document.getElementById("messages");
 			div.innerHTML="";
+			return "";
 		},
 		"replaceMessage": true,
 		"man": "efface les messages de l'écran."
 	},
 	"exec": {
-		"regex": "^exec .+$",
+		"regex": /^exec .+$/g,
 		"exec": function(args){
 			args = args.replace(/^exec +/gi,"");
 			addText("résultat : " + eval(args));
+			return "";
 		},
 		"replaceMessage": true,
 		"man": "exécute un code javascript.<br/>"+tab+"exemple:<br/>"+tab+tab+"exec 1+1 => renvoie 2"
 	},
 	"[HOUR]": {
-		"regex": "^\[HOUR(:.+)?\]$",
+		"regex": /^\[HOUR(:.+)?\]$/gi,
 		"exec": function(args){
 			args = args.replace(/\[HOUR:/gi,"");
 			args = args.replace(/\]/gi,"");
@@ -63,12 +65,13 @@ var commands={
 			}else{
 				addText("commande inconnue");
 			}
+			return "";
 		},
 		"replaceMessage": true,
 		"man": "change le format d'heure.<br/>"+tab+tab+"[HOUR]: commande générique le format d'heure vous sera demandé.<br/>"+tab+tab+"[HOUR:format]: modification du format d'heure en passant le nom du format en paramètre "+ getOptions("hour")+"."
 	},
 	"man": {
-		"regex": "^man( .+)?$",
+		"regex": /^man( .+)?$/g,
 		"exec": function(args){
 			args=args.replace(/^man ?/g,"");
 			var message="";
@@ -91,12 +94,13 @@ var commands={
 				message+="</p><br/><br/>";
 			}
 			addText(message);
+			return "";
 		},
 		"replaceMessage": true,
 		"man": "manuel du petit geek (tu t'attendais à ce que ce soit quoi?!)"
 	},
 	"[TO]": {
-		"regex": "^\[TO:.+\].+$",
+		"regex": /^\[TO:.+\].+$/gi,
 		"replaceMessage": false,
 		"man": "envoie un message personalisé à une personne: la commande doit indiquer l'utilisateur en question. Il est possible également d'envoyer le message à plusieurs personnes en séparant leurs noms par des virgules'<br/>"+tab+tab+"exemples:<br/>"+tab+tab+tab+"[TO:utilisateur1] Bonjour le monde<br/>"+tab+tab+tab+"[TO:utilisateur1,utilisateur2] Bonjour le monde<br/>"
 	}
@@ -158,14 +162,12 @@ function addMessage(message){
 }
 function interpretCommand(message){
 	for(var i in commands){
-		var regex = new RegExp(commands[i].regex,"gi");
+		var regex = commands[i].regex;
 		if(regex.test(message)){
 			//test des conditions
-			if((typeof(commands[i].condition)=== "undefined")
-				||(
-					(typeof(commands[i].condition) === "function" && commands[i].condition() == true) 
-					|| typeof(commands[i].condition) !== "function" && commands[i].condition
-				)
+			if(		typeof(commands[i].condition) === "undefined"
+				|| (typeof(commands[i].condition) === "function" && commands[i].condition()) 
+				|| (typeof(commands[i].condition) === "boolean" && commands[i].condition)
 			){
 				var msg = undefined;
 				if(commands[i].exec){
@@ -238,17 +240,19 @@ function getQuestion(i){
 }
 function getOptions(i){
 	var options = "";
-	if(typeof(questions[i].options) !== "undefined"){
-		options += "(";
-		var counter = 0;
-		for(var j in questions[i].options){
-			if(counter>0){
-				options+="/";
+	if(questions && questions[i]){
+		if(typeof(questions[i].options) !== "undefined"){
+			options += "(";
+			var counter = 0;
+			for(var j in questions[i].options){
+				if(counter>0){
+					options+="/";
+				}
+				options += j;
+				counter++;
 			}
-			options += j;
-			counter++;
+			options += ")";
 		}
-		options += ")";
 	}
 	return options;
 }
@@ -317,6 +321,7 @@ function getWritingUsers(){
 
 socket.on("message",function(message){
 	if(isValid){
+		message.msg = interpretCommand(message.msg);
 		addMessage(message);
 	}
 	focus();
@@ -355,6 +360,7 @@ socket.on("invalidPseudo",function(message){
 	isValid = false;
 	init();
 });
+
 window.onclick = function(){
 	focus();
 }
