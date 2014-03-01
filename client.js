@@ -6,74 +6,23 @@ var isValid = false;
 var users = {};
 var writtingUsers = [];
 var currentWrittingTimeout = 0;
-
+var firstInit=true;
 /**
-* command definition: *."name": {
+* command definition: 
+* "name": {
 * 	"regex": regular expression,
-* 	"exec": function(command line is given in parameters),
+* 	"exec"(optional): function(command line is given in parameters) which will be executed when command is found,
 * 	"replaceMessage": true/false,(if true the exec function returns a new message which will replace the users message)
 * 	"condition"(optional): function(returns true or false) => if false the command will not be interpreted,
 * 	"man": description
 * }
 */
 var commands={
-	"[BIP]": {
-		"regex": /\[BIP\]/gi,
-		"exec": function(){
-			var sound=document.getElementById("sound");
-			sound.load();
-			sound.play();
-		},
-		"replaceMessage": false,
-		"condition": function(){
-			return questions.sound.options[questions.sound.a]==true;
-		},
-		"man": "envoie un signal sonore au reste du monde."
-	},
-	"clear": {
-		"regex": /^clear$/g,
-		"exec": function(){
-			var div=document.getElementById("messages");
-			div.innerHTML="";
-			return "";
-		},
-		"replaceMessage": true,
-		"man": "efface les messages de l'écran."
-	},
-	"exec": {
-		"regex": /^exec .+$/g,
-		"exec": function(args){
-			args = args.replace(/^exec +/gi,"");
-			addText("résultat : " + eval(args));
-			return "";
-		},
-		"replaceMessage": true,
-		"man": "exécute un code javascript.<br/>"+tab+"exemple:<br/>"+tab+tab+"exec 1+1 => renvoie 2"
-	},
-	"[HOUR]": {
-		"regex": /^\[HOUR(:.+)?\]$/gi,
-		"exec": function(args){
-			args = args.replace(/\[HOUR:/gi,"");
-			args = args.replace(/\]/gi,"");
-			args = args.toLowerCase();
-			if(questions.hour.options[args]){
-				questions.hour.a = args;
-			}else if(args===""){
-				questions.hour.a = undefined;
-				isValid = false;
-				init();
-			}else{
-				addText("commande inconnue");
-			}
-			return "";
-		},
-		"replaceMessage": true,
-		"man": "change le format d'heure.<br/>"+tab+tab+"[HOUR]: commande générique le format d'heure vous sera demandé.<br/>"+tab+tab+"[HOUR:format]: modification du format d'heure en passant le nom du format en paramètre "+ getOptions("hour")+"."
-	},
+	//man must be the first command
 	"man": {
-		"regex": /^man( .+)?$/g,
+		"regex": /^man( .+)?$/,
 		"exec": function(args){
-			args=args.replace(/^man ?/g,"");
+			args=args.replace(/^man ?/,"");
 			var message="";
 			if(args!==""){
 				for(var i in commands){
@@ -99,8 +48,62 @@ var commands={
 		"replaceMessage": true,
 		"man": "manuel du petit geek (tu t'attendais à ce que ce soit quoi?!)"
 	},
+	// OTHERS COMMANDS
+	"[BIP]": {
+		"regex": /\[BIP\]/i,
+		"exec": function(){
+			var sound=document.getElementById("sound");
+			sound.load();
+			sound.play();
+		},
+		"replaceMessage": false,
+		"condition": function(){
+			return questions.sound.options[questions.sound.a]==true;
+		},
+		"man": "envoie un signal sonore au reste du monde."
+	},
+	"clear": {
+		"regex": /^clear$/,
+		"exec": function(){
+			var div=document.getElementById("messages");
+			div.innerHTML="";
+			return "";
+		},
+		"replaceMessage": true,
+		"man": "efface les messages de l'écran."
+	},
+	"exec": {
+		"regex": /^exec .+$/,
+		"exec": function(args){
+			args = args.replace(/^exec +/i,"");
+			addText("résultat : " + eval(args));
+			return "";
+		},
+		"replaceMessage": true,
+		"man": "exécute un code javascript.<br/>"+tab+"exemple:<br/>"+tab+tab+"exec 1+1 => renvoie 2"
+	},
+	"[HOUR]": {
+		"regex": /^\[HOUR(:.+)?\]$/i,
+		"exec": function(args){
+			args = args.replace(/\[HOUR:?/i,"");
+			args = args.replace(/\]/i,"");
+			args = args.toLowerCase();
+			if(questions.hour.options[args]){
+				questions.hour.a = args;
+			}else if(args===""){
+				questions.hour.a = undefined;
+				isValid = false;
+				init();
+			}else{
+				addText("commande inconnue");
+			}
+			return "";
+		},
+		"replaceMessage": true,
+		"man": "change le format d'heure.<br/>"+tab+tab+"[HOUR]: commande générique le format d'heure vous sera demandé.<br/>"+tab+tab+"[HOUR:format]: modification du format d'heure en passant le nom du format en paramètre "+ getOptions("hour")+"."
+	},
 	"[TO]": {
-		"regex": /^\[TO:.+\].+$/gi,
+		"regex": /^\[TO:.+\].+$/i,
 		"replaceMessage": false,
 		"man": "envoie un message personalisé à une personne: la commande doit indiquer l'utilisateur en question. Il est possible également d'envoyer le message à plusieurs personnes en séparant leurs noms par des virgules'<br/>"+tab+tab+"exemples:<br/>"+tab+tab+tab+"[TO:utilisateur1] Bonjour le monde<br/>"+tab+tab+tab+"[TO:utilisateur1,utilisateur2] Bonjour le monde<br/>"
 	}
@@ -124,12 +127,12 @@ var questions = {
 				return new Date().getHours().toString(16)+" : "+new Date().getMinutes().toString(16)+" : "+new Date().getSeconds().toString(16);
 			},
 			'normal': function(){
-				return new Date().getHours()+" : "+new Date().getMinutes()+" : "+new Date().getSeconds();
+				var date = new Date();
+				return (date.getHours()<10 ? "0" : "" )+date.getHours()+" : "+(date.getMinutes()<10 ? "0" : "" )+date.getMinutes()+" : "+(date.getSeconds()<10 ? "0" : "" )+date.getSeconds();
 			}
 		}
 	}
 };
-
 
 function addText(text){
 	var div = document.getElementById("messages");
@@ -163,10 +166,10 @@ function addMessage(message){
 function interpretCommand(message){
 	for(var i in commands){
 		var regex = commands[i].regex;
-		if(regex.test(message)){
+		if(regex.test(message) == true){
 			//test des conditions
 			if(		typeof(commands[i].condition) === "undefined"
-				|| (typeof(commands[i].condition) === "function" && commands[i].condition()) 
+				|| (typeof(commands[i].condition) === "function" && commands[i].condition())
 				|| (typeof(commands[i].condition) === "boolean" && commands[i].condition)
 			){
 				var msg = undefined;
@@ -231,7 +234,10 @@ function init(){
 		name: chatName,
 		msg: "C'est bon j'ai fini avec mes questions tu peux y aller."
 	});
-	socket.emit("pseudo",questions.pseudo.a);
+	if(firstInit){
+		socket.emit("pseudo",questions.pseudo.a);
+	}
+	firstInit=false;
 }
 function getQuestion(i){
 	var question = questions[i].q;
@@ -273,6 +279,7 @@ function setAnswer(msg){
 }
 function sendRequest(){
 	var message = document.getElementById("request").value;
+	document.getElementById("request").value="";
 	if(message!=""){
 		if(!isValid){
 			if(!setAnswer(message)){
@@ -284,12 +291,9 @@ function sendRequest(){
 			init();
 		}else{
 			message = interpretCommand(message);
-			if(typeof(message) !== "undefined" && message !== "" && message !== "undefined"){
-				socket.emit("message",message);
-				addMessage(message);
-			}
+			socket.emit("message",message);
+			addMessage(message);
 		}
-		document.getElementById("request").value="";
 	}
 }
 function notify(message){

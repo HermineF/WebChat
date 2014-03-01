@@ -46,7 +46,6 @@ var server = http.createServer(function(req, res) {
 function isPseudoValid(msg){
 	for(var i in users){
 		if(users[i].pseudo == msg){
-			socket.emit('invalidPseudo', {'name':"server",msg:"Ce pseudo est déjà utilisé par quelqu'un."});
 			return false;
 		}
 	}
@@ -61,15 +60,16 @@ io.sockets.on('connection', function (socket) {
 	//Envoi des messages aux autres utilisateurs
 	socket.on('message',function(message){
 		if(socket.pseudo){
-			var regex = /^\[TO:.+\]/gi;
+			var regex = /^\[TO:.+\]/i;
 			if(regex.test(message)){
 				//envoi du message à une personne/groupe de personnes en particulier
-				var temp = message.replace(/^\[TO:/gi,"").replace(/\].*/gi,"");
+				var temp = message.replace(/^\[TO:/gi,"").replace(/\].*/i,"");
 				var usersToSendMessage = temp.split(",");
 				for(var i in usersToSendMessage){
 					if(users[usersToSendMessage[i]]){
-						users[usersToSendMessage[i]].socket.emit({'name':socket.pseudo, 'msg':message});
-					}else{
+						console.log("Send to ", usersToSendMessage[i]);
+						users[usersToSendMessage[i]]["socket"].emit('message', {'name':socket.pseudo, 'msg':message});
+					}else if(typeof(usersToSendMessage[i])=== "string"){
 						socket.emit('message', {'name':"server",msg:'Je ne connais personne du nom de '+i});
 					}
 				}
@@ -79,7 +79,10 @@ io.sockets.on('connection', function (socket) {
 		}
 	});
 	socket.on('pseudo',function(msg){
-		if(!isPseudoValid(msg)){return;}
+		if(!isPseudoValid(msg)){
+			socket.emit('invalidPseudo', {'name':"server",msg:"Ce pseudo est déjà utilisé par quelqu'un."});
+			return;
+		}
 		
 		socket.pseudo = msg;
 		
@@ -94,7 +97,15 @@ io.sockets.on('connection', function (socket) {
 			}
 		}else if(usersNb <= 10){
 			var counter = 0;
-			for(var i in users){if(counter!=0){usersList+=", ";}usersList+=users[i].pseudo;counter++;}
+			for(var i in users){
+				if(typeof(users[i])!=="undefined" && typeof(users[i].pseudo)!== "undefined"){
+					if(counter!=0){
+						usersList+=", ";
+					}
+					usersList+=users[i].pseudo;
+					counter++;
+				}
+			}
 			usersList += " sont aussi connectés";
 		}else{
 			usersList += usersNb + " personnes sont aussi connectés";
