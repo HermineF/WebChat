@@ -7,6 +7,18 @@ var users = {};
 var writtingUsers = [];
 var currentWrittingTimeout = 0;
 var firstInit=true;
+
+var history=[];
+var historyCursor=-1;
+
+var KEYS={
+	TAB : 9,
+	ENTER : 13,
+	UP: 38,
+	DOWN  : 40
+};
+
+
 /**
 * command definition: 
 * "name": {
@@ -196,8 +208,22 @@ function getColor(str){
 }
 function keypress(e,textarea){
 	var code = (e.keyCode ? e.keyCode: e.which);
-	if(code == 13){
+	if(code == KEYS.ENTER){
 		sendRequest();currentWrittingTimeout = 0;
+	}else if(code == KEYS.UP){
+		historyCursor++;
+		if(history.length <= historyCursor){
+			historyCursor = history.length-1;
+		}
+		setTextFromHistory();
+		return false;
+	}else if(code == KEYS.DOWN){
+		historyCursor--;
+		if(historyCursor < -1){
+			historyCursor = -1;
+		}
+		setTextFromHistory();
+		return false;
 	}else if(isValid){
 		if(currentWrittingTimeout == 0){
 			socket.emit("writing",questions.pseudo.a);
@@ -206,6 +232,16 @@ function keypress(e,textarea){
 		setTimeout(function(){checkWritingState();},500);
 	}
 }
+
+function setTextFromHistory(){
+	var message ="";
+	if(historyCursor > -1){
+		message =history[history.length - 1 - historyCursor];
+	}
+	var element = document.getElementById("request");
+	element.value=message;
+}
+
 function checkWritingState(){
 	if(currentWrittingTimeout==0){
 		socket.emit("stopWriting",
@@ -281,6 +317,7 @@ function sendRequest(){
 	var message = document.getElementById("request").value;
 	document.getElementById("request").value="";
 	if(message!=""){
+		history.push(message);
 		if(!isValid){
 			if(!setAnswer(message)){
 				addMessage({
